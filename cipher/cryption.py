@@ -5,12 +5,12 @@
     @ide:PyCharm
     @time:2019-07-28 21:13
     @author:Sun
+    @说明：TODO 直接使用了固定的参数作为加密用的参数，剩余的以后实现
 '''
 
 import random
 import numpy as np
 import math
-import cipher.matrix as mt
 
 
 class Cryption:
@@ -43,10 +43,12 @@ class Cryption:
         self.__Cipher = None  # 密文
         self.__Real = None  # 明文
 
+        # self.__setK()
+
+    def Init(self):
         self.__setF()  # 得到F
         self.__setN()
         self.__setR()
-        # self.__setK()
 
     def __getPrimeNumber(self):
         """
@@ -58,6 +60,7 @@ class Cryption:
         return pn.generate_prime_number(self.__length)
 
     def __setF(self):
+        self.__F = []
         while self.__F.__len__() < self.__M:
             a = self.__getPrimeNumber()
             b = self.__getPrimeNumber()
@@ -78,20 +81,20 @@ class Cryption:
             self.__N *= tf
 
     def __setR(self):
-        self.__R = random.randint(0, self.__N-1)
+        self.__R = random.randint(0, self.__N - 1)
 
     def __setK(self):
         from cipher.chRT import check_mat
         while True:
-            self.__K = np.mat(np.random.randint(0, self.__N-1, size=(4, 4)))  # todo
+            self.__K = np.mat(np.random.randint(0, self.__N - 1, size=(4, 4)))  # todo
             if check_mat(self.__K, self.__N):
                 return
 
     # 随机产生一个Zn的明文
     def gettext(self):
-        return random.randint(0, self.__N-1)
+        return random.randint(0, self.__N - 1)
 
-    def __setABC(self, __x):
+    def __setABC(self, x):
         for i in range(self.__M):
             tmp = random.random()
             if tmp < self.__M / (self.__M + 1):
@@ -113,21 +116,42 @@ class Cryption:
         :param x:  明文
         :return:
         '''
-        # self.__setABC(x)  # 初始化A，B，C
-        import sys
+
+        from modint import chinese_remainder
+        self.__a = chinese_remainder(self.__F, self.__A)% self.__N
+        self.__b = chinese_remainder(self.__F, self.__B)% self.__N
+        self.__c = chinese_remainder(self.__F, self.__C)% self.__N
+        """import sys
         sys.setrecursionlimit(100000)  # ref:https://blog.csdn.net/cliviabao/article/details/79927186
         import cipher.CRT as crt
-        """from modint import chinese_remainder
-        self.__a = chinese_remainder(self.__A,self.__F)% self.__N
-        self.__b = chinese_remainder(self.__B, self.__F)% self.__N
-        self.__c = chinese_remainder(self.__C, self.__F)% self.__N"""
         self.__a = crt.crt(self.__A[:], self.__F[:]) % self.__N
         self.__b = crt.crt(self.__B[:], self.__F[:]) % self.__N
-        self.__c = crt.crt(self.__C[:], self.__F[:]) % self.__N
+        self.__c = crt.crt(self.__C[:], self.__F[:]) % self.__N"""
+
+    def reinit(self):
+        self.__F = [22, 21, 65]
+        self.__M = 3
+        self.__N = 30030
+        self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
+        self.__setR()
+
+        from cipher.chRT import check_mat
+        if check_mat(self.__K, self.__N) == False:
+            print("不是模逆矩阵")
+            return
+        from cipher.chRT import getinvmodmat
+        self.__invK = getinvmodmat(self.__K, self.__N)
+
+    def REencryption(self, x):
+        self.__setABC(x)
+        self.__setabc(x)
+        self.__A.clear()
+        self.__B.clear()
+        self.__C.clear()
+        self.__DIG = np.mat(np.diag([x, self.__a, self.__b, self.__c]))  # 对角矩阵
+        return ((self.__invK * self.__DIG * self.__K) % self.__N)
 
     def encryption(self, x):
-        # np.set_printoptions(suppress=True)
-        # print(self.__K)
         from cipher.chRT import check_mat
         if check_mat(self.__K, self.__N) == False:
             print("不是模逆矩阵")
@@ -146,7 +170,7 @@ class Cryption:
     def decryption(self):
         self.__Real = np.round((self.__K * self.__Cipher * self.__invK.astype(int)) % self.__N)
         print('plain text:\n', self.__Real)
-        self.__Real = self.__Real.item(0,0)
+        self.__Real = self.__Real.item(0, 0)
 
     def getcip(self):
         return self.__Cipher
@@ -163,11 +187,8 @@ class Cryption:
 
 if __name__ == '__main__':
     c = Cryption(M=2, length=5)
-    print('N:', c.getN())
-    # print(c.K)
-    x = c.gettext()
-    print('明文：', x)
-    c.encryption(x)
+    x = random.randint(0,255)
+    c.DNencryption(x)
     print('cipher:\n', c.getcip())
     c.decryption()
     print(c.getPlaintext())

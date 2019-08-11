@@ -78,7 +78,7 @@ def findMinX(num, rem):
 from functools import reduce
 
 
-def chinese_remainder(n, a):
+def chinese_remainder(n, a): #n是模数，a是被模数
     sum = 0
     prod = reduce(lambda a, b: a * b, n)
     for n_i, a_i in zip(n, a):
@@ -155,13 +155,21 @@ def check_mat(A, M):  # 检查矩阵A是否存在Ｍ的模逆矩阵  https://www
 
 
 if __name__ == '__main__':
-    import numpy as np
+    n = [3, 5, 7]
+    a = [2, 3, 2]
+    print(chinese_remainder(n, a))
+    # import numpy as np
+    #
+    # f=[15,14]
+    # a=[0,11]
+    # res=chinese_remainder(a,f)
+    # print(res)
 
-    k = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]],dtype=int)
-    print('原矩阵', k)
-    invk = getinvmodmat(k, 210)
-    a = (invk * k) % 210
-    print(a)
+    # k = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]],dtype=int)
+    # print('原矩阵', k)
+    # invk = getinvmodmat(k, 210)
+    # a = (invk * k) % 210
+    # print(a)
 
     # k = np.mat([[1,6,3],[4,7,9],[5,8,6]])
     # invk = getinvmodmat(k, 26)

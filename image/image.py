@@ -13,9 +13,11 @@ import numpy as np
 import copy
 import init
 import math
+import time
+from cipher.cryption import Cryption
 
 
-class IMAGE:
+class IMAGE(Cryption):
 
     def __init__(self, image):
         self.__image = copy.deepcopy(image)
@@ -24,6 +26,10 @@ class IMAGE:
         self.__length = len(image)
         self.__width = len(image[0])
         self.__size = self.__length * self.__width  # 像素个数
+
+        # TODo 加密
+        Cryption.__init__(self, init.M)
+        self.__encryimage = []
 
         # todo JL
         self.__mat = []
@@ -43,14 +49,37 @@ class IMAGE:
         self.__W = []
 
     def Init(self):
+        import matplotlib.pyplot as plt
         self.__setgrayimage()  # 原图变为灰度图
         print('**********get grayimage!')
+        # plt.imshow(self.__grayimage)
+        # plt.show()
+
+        self.__encryption()  # 给灰度图的每个像素加密
+        print('**********encry success!')
+
         self.__JLgetY()  # 得到JL变化的Y矩阵
-        print('**********get JL Y!')
+        # print('**********get JL Y!')
         self.__JLaddgauss()  # 得到JL变换的最终矩阵
         print('**********JL transform done!')
+        return
         self.__DNsetZ()
+        print('**********Z cal done!')
+        self.__DNsetW()
+        print('**********W cal done!')
         print('done!')
+
+    # TODO 对原图像进行加密
+    def __encryption(self):
+        self.reinit()
+        self.__encryimage = [None] * self.__width
+        self.__encryimage = [self.__encryimage[:] for i in range(self.__length)]
+        for i in range(self.__length):
+            # s = time.time()
+            for j in range(self.__width):
+                self.__encryimage[i][j] = self.REencryption(self.__grayimage[i][j])  # 对每个
+            # t = time.time()
+            # print(t - s)
 
     # todo 原图变为灰度图
     def __setgrayimage(self):
@@ -118,14 +147,10 @@ class IMAGE:
         np.array(self.__JL)
         # print(self.__JL)
 
-    def __DNsetZ(self):
+    def __DNsetZ(self, step=init.step):
         self.__exp = [0] * self.__size
-        # print(self.__exp)
-        self.__exp = [self.__exp] * self.__size
+        self.__exp = [self.__exp[:] for i in range(self.__size)]
         TMPC = 2 * self.__K * pow(self.__sigma, 2)
-        # print(len(self.__exp))
-        # for i in self.__exp:
-        #     print(i)
 
         def getexp(i, TMPC):
             for j in range(i + 1, self.__size):
@@ -133,9 +158,7 @@ class IMAGE:
                 tmpdis = np.abs(np.array(self.__JL[i]) - np.array(self.__JL[j]))  # 欧氏距离
                 # print(tmpdis)
                 tmpdis = pow(tmpdis, 2)  # 距离平方
-                tmpsum = 0
-                for el in tmpdis:
-                    tmpsum += el
+                tmpsum = sum(tmpdis)  # k维向量的每一个值加和
                 tem = -(tmpsum - TMPC) / pow(self.__H, 2)
                 tem = math.exp(tem)
                 # print(tem)
@@ -144,17 +167,17 @@ class IMAGE:
             # print(i, end=' ')
 
         from threading import Thread
-        for i in range(0, 8, 4):
-            print('\niterator: ', i)
+        for i in range(0, self.__size, step):
+            # print('\niterator: ', i)
             func = []
-            for j in range(4):
+            for j in range(step):
                 if j < self.__size:
                     func.append(Thread(target=getexp, args=(i + j, TMPC)))
             for th in func:
                 th.start()
             for th in func:
                 th.join()
-
+        # print(self.__exp)
         """for i in range(self.__size):
             print(i)
             for j in range(i + 1, self.__size):
@@ -170,28 +193,22 @@ class IMAGE:
                 self.__exp[i][j] = tem
                 self.__exp[j][i] = tem"""
 
-        """print('asdsaddddddddddddd')
-        for i in range(4):
-            print(self.__exp[i])
-
-        return"""
-
         for i in range(self.__size):
-            sum = 0
+            tsum = 0
             for j in self.__mat[i]:
                 if j == -1:
                     continue
-                sum += self.__exp[i][j]
-            self.__Z.append(sum)
+                tsum += self.__exp[i][j]
+            self.__Z.append(tsum)
 
         # print(self.__Z)
 
     def __DNsetW(self):
         self.__W = [0] * self.__size
-        self.__W = [self.__W] * self.__size
+        self.__W = [self.__W[:] for i in range(self.__size)]
         for i in range(self.__size):
             for j in range(self.__size):
-                self.__W[i][j] = self.__exp[i][j] / self.__Z[i]
+                self.__W[i][j] = self.__exp[i][j] / self.__Z[i]  # i=j的时候怎么办，现在是0
 
     def test(self):
         self.__grayimage = [[i * j for j in range(1, 6)] for i in range(1, 6)]
@@ -216,3 +233,7 @@ class IMAGE:
 
     def getGrayimage(self):
         return self.__grayimage
+
+    def printimagesize(self):
+        print('height:', self.__length)
+        print('width:', self.__width)
