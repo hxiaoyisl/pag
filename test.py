@@ -1,13 +1,18 @@
 #
 
-def ge(a):
-    if a<4:
-        print('a')
-    elif a>=4 and a<8:
-        print('b')
-    else:
-        print('c')
-ge(5)
+a=[0.1,0.2]
+
+a=map(lambda x:pow(x,2),a)
+print(list(a))
+
+# def ge(a):
+#     if a<4:
+#         print('a')
+#     elif a>=4 and a<8:
+#         print('b')
+#     else:
+#         print('c')
+# ge(5)
 
 # class Test:
 #     def __init__(self):

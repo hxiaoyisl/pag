@@ -151,6 +151,10 @@ class Cryption:
         self.__DIG = np.mat(np.diag([x, self.__a, self.__b, self.__c]))  # 对角矩阵
         return ((self.__invK * self.__DIG * self.__K) % self.__N)
 
+    def REdecryption(self,cipher):
+        self.__Real = np.round((self.__K * cipher * self.__invK.astype(int)) % self.__N)
+        return self.__Real.item(0, 0)
+
     def encryption(self, x):
         from cipher.chRT import check_mat
         if check_mat(self.__K, self.__N) == False:

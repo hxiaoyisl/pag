@@ -8,8 +8,8 @@
 '''
 
 # todo image
-imagepath = 'img/001.jpg'
-# imagepath = 'img/003.png'
+# imagepath = 'img/000.jpg'
+imagepath = 'img/003.png'
 
 # todo JL
 S = 3  # Jl变换中像素的小矩阵的宽度
