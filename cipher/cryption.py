@@ -35,10 +35,10 @@ class Cryption:
         self.__b = None
         self.__c = None
 
-        self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]])
-        self.__invK = np.mat([[35, 31, 29, 0], [44, 57, 113, 29], [74, 157, 37, 194], [59, 27, 152, 103]])
-        # self.__K =None
-        # self.__invK=None
+        # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]])
+        # self.__invK = np.mat([[35, 31, 29, 0], [44, 57, 113, 29], [74, 157, 37, 194], [59, 27, 152, 103]])
+        self.__K = None
+        self.__invK = None
         self.__DIG = None
         self.__Cipher = None  # 密文
         self.__Real = None  # 明文
@@ -81,7 +81,11 @@ class Cryption:
             self.__N *= tf
 
     def __setR(self):
-        self.__R = random.randint(0, self.__N - 1)
+        while True:
+            self.__R = random.randint(0, self.__N - 1)
+            from cipher.bigprimenumber import is_prime
+            if is_prime(self.__R):
+                return
 
     def __setK(self):
         from cipher.chRT import check_mat
@@ -118,22 +122,38 @@ class Cryption:
         '''
 
         from modint import chinese_remainder
-        self.__a = chinese_remainder(self.__F, self.__A)% self.__N
-        self.__b = chinese_remainder(self.__F, self.__B)% self.__N
-        self.__c = chinese_remainder(self.__F, self.__C)% self.__N
-        """import sys
-        sys.setrecursionlimit(100000)  # ref:https://blog.csdn.net/cliviabao/article/details/79927186
-        import cipher.CRT as crt
-        self.__a = crt.crt(self.__A[:], self.__F[:]) % self.__N
-        self.__b = crt.crt(self.__B[:], self.__F[:]) % self.__N
-        self.__c = crt.crt(self.__C[:], self.__F[:]) % self.__N"""
+        self.__a = chinese_remainder(self.__F, self.__A) % self.__N
+        self.__b = chinese_remainder(self.__F, self.__B) % self.__N
+        self.__c = chinese_remainder(self.__F, self.__C) % self.__N
+        # print(self.__a, self.__b, self.__c)
+
+        """from cipher.chRT import chinese_remainder
+        self.__a = chinese_remainder(self.__F, self.__A) % self.__N
+        self.__b = chinese_remainder(self.__F, self.__B) % self.__N
+        self.__c = chinese_remainder(self.__F, self.__C) % self.__N
+        print(self.__a, self.__b, self.__c)"""
+
+        # import sys
+        # sys.setrecursionlimit(100000)  # ref:https://blog.csdn.net/cliviabao/article/details/79927186
+        # import cipher.CRT as crt
+        # self.__a = crt.crt(self.__A[:], self.__F[:]) % self.__N
+        # self.__b = crt.crt(self.__B[:], self.__F[:]) % self.__N
+        # self.__c = crt.crt(self.__C[:], self.__F[:]) % self.__N
+        # print(self.__a, self.__b, self.__c)
 
     def reinit(self):
+        # self.__F = [15, 14]
+        # self.__M = 2
+        # self.__N = 210
+        # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]])
+
         self.__F = [22, 21, 65]
         self.__M = 3
         self.__N = 30030
         self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
+        # self.__setK()
         self.__setR()
+        print('R: ', self.__R)
 
         from cipher.chRT import check_mat
         if check_mat(self.__K, self.__N) == False:
@@ -141,31 +161,38 @@ class Cryption:
             return
         from cipher.chRT import getinvmodmat
         self.__invK = getinvmodmat(self.__K, self.__N)
+        # print('K: ', self.__K)
+        # print('invK: ', self.__invK)
+        # print(self.__K * self.__invK % self.__N)
 
     def REencryption(self, x):
         self.__setABC(x)
+        # print(self.__A, self.__B, self.__C)
         self.__setabc(x)
         self.__A.clear()
         self.__B.clear()
         self.__C.clear()
         self.__DIG = np.mat(np.diag([x, self.__a, self.__b, self.__c]))  # 对角矩阵
-        return ((self.__invK * self.__DIG * self.__K) % self.__N)
+        # print('DIG:\n', self.__DIG)
+        # self.__Cipher = (((self.__invK * self.__DIG) % self.__N) * self.__K) % self.__N
+        return ((((self.__invK * self.__DIG) % self.__N) * self.__K) % self.__N)
 
-    def REdecryption(self,cipher):
-        self.__Real = np.round((self.__K * cipher * self.__invK.astype(int)) % self.__N)
+    def REdecryption(self, cipher):
+        # print('K:', self.__K)
+        # print('invK:', self.__invK)
+        cipher = cipher % self.__N
+        np.mat(cipher)
+        self.__Real = np.round((((self.__K * cipher) % self.__N) * self.__invK) % self.__N)
         return self.__Real.item(0, 0)
+        # return self.__Real
 
     def encryption(self, x):
-        from cipher.chRT import check_mat
-        if check_mat(self.__K, self.__N) == False:
-            print("不是模逆矩阵")
-            return
 
         self.__setABC(x)
         self.__setabc(x)
         from cipher.chRT import getinvmodmat
         self.__DIG = np.mat(np.diag([x, self.__a, self.__b, self.__c]))  # 对角矩阵
-        self.__invK = getinvmodmat(self.__K, self.__N)
+        # self.__invK = getinvmodmat(self.__K, self.__N)
         print((self.__K * self.__invK) % self.__N)
         # self.DIG = np.mat(np.diag([x, 147, 196, 91]))
         print('DIG:\n', self.__DIG)
@@ -188,11 +215,21 @@ class Cryption:
     def getabc(self):
         return self.__a, self.__b, self.__c
 
+    def changechiper(self, num, cipher):
+        print('dig:', self.__DIG * (num % self.__N) % self.__N)
+        cipher = cipher * (num % self.__N) % self.__N
+        return cipher
+
 
 if __name__ == '__main__':
     c = Cryption(M=2, length=5)
-    x = random.randint(0,255)
-    c.DNencryption(x)
-    print('cipher:\n', c.getcip())
-    c.decryption()
-    print(c.getPlaintext())
+    c.reinit()
+    x = random.randint(0, 255)
+    # x=224
+    print('plain:', x)
+    tmp = c.REencryption(x)
+    print('cipher:\n', tmp)
+    tmp = c.changechiper(122222, tmp)
+    print('cipher', tmp)
+    tmp = c.REdecryption(tmp)
+    print('plain:\n', tmp)

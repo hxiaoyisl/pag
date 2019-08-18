@@ -1,9 +1,26 @@
 #
 
-a=[0.1,0.2]
+import numpy as np
+import random
 
-a=map(lambda x:pow(x,2),a)
-print(list(a))
+for i in range(100):
+    print(random.gauss(mu=0, sigma=60))
+
+# a=[[i*j for i in range(5)] for j in range(5)]
+# print(a)
+# b=[i[1:-1] for i in a][1:-1]
+# print(b)
+
+
+# import numpy as np
+#
+# a=np.random.normal(0,0.5,[1,10])
+# print(a)
+
+# a=[0.1,0.2]
+#
+# a=map(lambda x:pow(x,2),a)
+# print(list(a))
 
 # def ge(a):
 #     if a<4:
