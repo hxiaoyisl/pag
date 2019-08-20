@@ -133,13 +133,6 @@ class Cryption:
         self.__c = chinese_remainder(self.__F, self.__C) % self.__N
         print(self.__a, self.__b, self.__c)"""
 
-        # import sys
-        # sys.setrecursionlimit(100000)  # ref:https://blog.csdn.net/cliviabao/article/details/79927186
-        # import cipher.CRT as crt
-        # self.__a = crt.crt(self.__A[:], self.__F[:]) % self.__N
-        # self.__b = crt.crt(self.__B[:], self.__F[:]) % self.__N
-        # self.__c = crt.crt(self.__C[:], self.__F[:]) % self.__N
-        # print(self.__a, self.__b, self.__c)
 
     def reinit(self):
         # self.__F = [15, 14]
