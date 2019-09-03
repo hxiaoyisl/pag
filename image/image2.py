@@ -96,7 +96,7 @@ class IMAGE(Cryption):
         self.__decryption()
         print('**********decryption done!')
         plt.imshow(self.__decryimage)
-        plt.savefig('result.png')
+        plt.savefig('result01.png')
         plt.show()
         print('done!')
 

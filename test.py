@@ -1,10 +1,25 @@
 #
 
-import numpy as np
-import random
+k=int(input('个数：'))
 
-for i in range(100):
-    print(random.gauss(mu=0, sigma=60))
+res=1
+for i in range(k):
+    tmp=int(input(str(i)+'is:'))
+    res*=tmp
+
+print(res)
+# from PIL import Image
+# image=Image.open('/home/sun/Pictures/壁纸/002.jpeg')
+#
+# image=image.transpose(Image.FLIP_LEFT_RIGHT)
+#
+# image.save('iii.jpg')
+
+# import numpy as np
+# import random
+#
+# for i in range(100):
+#     print(random.gauss(mu=0, sigma=60))
 
 # a=[[i*j for i in range(5)] for j in range(5)]
 # print(a)

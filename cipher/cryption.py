@@ -133,7 +133,6 @@ class Cryption:
         self.__c = chinese_remainder(self.__F, self.__C) % self.__N
         print(self.__a, self.__b, self.__c)"""
 
-
     def reinit(self):
         # self.__F = [15, 14]
         # self.__M = 2
@@ -144,9 +143,6 @@ class Cryption:
         self.__M = 3
         self.__N = 30030
         self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
-        # self.__setK()
-        self.__setR()
-        print('R: ', self.__R)
 
         from cipher.chRT import check_mat
         if check_mat(self.__K, self.__N) == False:
@@ -154,9 +150,22 @@ class Cryption:
             return
         from cipher.chRT import getinvmodmat
         self.__invK = getinvmodmat(self.__K, self.__N)
-        # print('K: ', self.__K)
-        # print('invK: ', self.__invK)
-        # print(self.__K * self.__invK % self.__N)
+        print('K: ', self.__K)
+        print('invK: ', self.__invK)
+        print(self.__K * self.__invK % self.__N)
+
+        # self.__F = [22, 21, 65, 4087, 437]
+        # self.__M = 5
+        # self.__N = 53634150570
+        # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
+        # self.__invK = np.mat([[7821825515, 50436115502, 45163305053, 22722937994],
+        #                       [52757810644, 9476597139, 21449587732, 2489170559],
+        #                       [27936671984, 38533605830, 27914121499, 24732580746],
+        #                       [43508310480, 8011389075, 27298722460, 11418062143]])
+        # print(self.__invK * self.__K % self.__N)
+        # self.__setK()
+        self.__setR()
+        print('R: ', self.__R)
 
     def REencryption(self, x):
         self.__setABC(x)
@@ -222,7 +231,7 @@ if __name__ == '__main__':
     print('plain:', x)
     tmp = c.REencryption(x)
     print('cipher:\n', tmp)
-    tmp = c.changechiper(122222, tmp)
-    print('cipher', tmp)
+    # tmp = c.changechiper(122222, tmp)
+    # print('cipher', tmp)
     tmp = c.REdecryption(tmp)
     print('plain:\n', tmp)

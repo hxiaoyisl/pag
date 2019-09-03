@@ -109,11 +109,8 @@ def getinvmodmat2(A, M):
             break
         for i in range(N):
             if i != j:
-                # A[i] -= (A.item(i, j) * A[j] % M)
-                A[i] -= (A.item(i, j) * A[j])
-                # for i in A[i]:
-                #     if i.any()<0:
-                #         i+=M
+                A[i] -= (A.item(i, j) * A[j] % M)
+                # A[i]=A[i]*A.item(j,j)-A[j]*A.item(i,j)
                 A[i] %= M
         print(A)
     return A[:, N:N * 2]
@@ -128,12 +125,17 @@ def setK(N):  # c产生一个模N的4阶矩阵
 
 if __name__ == '__main__':
     K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
+    M=30030
     # K[1]*=2
     # K[[0,1],:]=K[[1,0],:]
-    print(K)
-    a = getinvmodmat2(K, 30030)
-    print(a)
-    res = np.dot(K, a) % 30030
+    # print(K)
+    a = getinvmodmat2(K, M)
+    print('a', a)
+    res = np.dot(K, a) % M
+    print(res)
+    b = getinvmodmat(K, M)
+    print('b', b)
+    res = np.dot(K, b) % M
     print(res)
 
     # n = [3, 5, 7]
