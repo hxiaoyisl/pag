@@ -123,9 +123,21 @@ def setK(N):  # c产生一个模N的4阶矩阵
             return K
 
 
+def matmultimod(a, b, n, m):
+    res = [0] * n
+    res = [res[:] for i in range(n)]
+
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):
+                res[i][j] += a[i][k] * b[k][j]
+            res[i][j] %= m
+    return res
+
+
 if __name__ == '__main__':
     K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
-    M=30030
+    M = 30030
     # K[1]*=2
     # K[[0,1],:]=K[[1,0],:]
     # print(K)

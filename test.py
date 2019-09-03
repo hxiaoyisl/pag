@@ -1,13 +1,25 @@
 #
+import numpy as np
+a=22*21*65*323*667
+print(a)
 
-k=int(input('个数：'))
+a = 17 * 3188752432 + 44 * 23781510238 + 169 * 11590684370 + 126 * 38958317798
+print(a)
+a %= 39642633030
+print(a)
+#
+# a=91 * 7254113 + 121 * 7582091 + 84 * 9254509 + 85 * 4360904
+# print(a)
+# print(a%9699690)
 
-res=1
-for i in range(k):
-    tmp=int(input(str(i)+'is:'))
-    res*=tmp
-
-print(res)
+# k=int(input('个数：'))
+#
+# res=1
+# for i in range(k):
+#     tmp=int(input(str(i)+'is:'))
+#     res*=tmp
+#
+# print(res)
 # from PIL import Image
 # image=Image.open('/home/sun/Pictures/壁纸/002.jpeg')
 #

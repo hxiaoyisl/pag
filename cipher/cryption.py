@@ -11,6 +11,7 @@
 import random
 import numpy as np
 import math
+from cipher.chRT import matmultimod
 
 
 class Cryption:
@@ -139,10 +140,21 @@ class Cryption:
         # self.__N = 210
         # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [85, 71, 119, 25], [0, 85, 201, 44]])
 
-        self.__F = [22, 21, 65]
-        self.__M = 3
-        self.__N = 30030
+        self.__F = [22,  # 2*11
+                    21,  # 3*7
+                    65,  # 5*13
+                    323,  # 17*19
+                    #667,  # 23*29
+                    # 4087  # 61*67
+                    ]
+        self.__M = 4
+        self.__N = 9699690#6469693230  # 39642633030  # 9699690 #30030
         self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
+
+        # self.__F = [22, 21, 65]
+        # self.__M = 3
+        # self.__N = 30030
+        # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
 
         from cipher.chRT import check_mat
         if check_mat(self.__K, self.__N) == False:
@@ -150,13 +162,21 @@ class Cryption:
             return
         from cipher.chRT import getinvmodmat
         self.__invK = getinvmodmat(self.__K, self.__N)
-        print('K: ', self.__K)
-        print('invK: ', self.__invK)
-        print(self.__K * self.__invK % self.__N)
+        print('用函数求出来的模逆矩阵:\n',self.__invK)
 
-        # self.__F = [22, 21, 65, 4087, 437]
-        # self.__M = 5
-        # self.__N = 53634150570
+        # self.__invK = np.mat([[4475432465, 6014392064, 6292653233, 2132793728],
+        #                       [4582859262, 3649936299, 308271498, 4352652179],
+        #                       [2504084804, 1093385008, 3006458719, 2095201248],
+        #                       [2498598530, 452477715, 3020965468, 105941323]])
+
+        print('K: ', self.__K)
+        # print('invK: ', self.__invK)
+
+        print(matmultimod(self.__K.tolist(), self.__invK.tolist(), 4, self.__N))
+
+        # self.__F = [22, 21, 65, 323]
+        # self.__M = 4
+        # self.__N = 9699690
         # self.__K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
         # self.__invK = np.mat([[7821825515, 50436115502, 45163305053, 22722937994],
         #                       [52757810644, 9476597139, 21449587732, 2489170559],
@@ -177,15 +197,27 @@ class Cryption:
         self.__DIG = np.mat(np.diag([x, self.__a, self.__b, self.__c]))  # 对角矩阵
         # print('DIG:\n', self.__DIG)
         # self.__Cipher = (((self.__invK * self.__DIG) % self.__N) * self.__K) % self.__N
-        return ((((self.__invK * self.__DIG) % self.__N) * self.__K) % self.__N)
+        res = matmultimod(self.__invK.tolist(), self.__DIG.tolist(), 4, self.__N)
+        res = matmultimod(res, self.__K.tolist(), 4, self.__N)
+        return res
+
+        # return ((((self.__invK * self.__DIG) % self.__N) * self.__K) % self.__N)
 
     def REdecryption(self, cipher):
         # print('K:', self.__K)
         # print('invK:', self.__invK)
-        cipher = cipher % self.__N
-        np.mat(cipher)
-        self.__Real = np.round((((self.__K * cipher) % self.__N) * self.__invK) % self.__N)
-        return self.__Real.item(0, 0)
+        for i in range(len(cipher)):
+            for j in range(len(cipher[0])):
+                cipher[i][j] %= self.__N
+
+        res = matmultimod(self.__K.tolist(), cipher, 4, self.__N)
+        self.__Real = matmultimod(res, self.__invK.tolist(), 4, self.__N)
+        return self.__Real[0][0]
+
+        # cipher = cipher % self.__N
+        # np.mat(cipher)
+        # self.__Real = np.round((((self.__K * cipher) % self.__N) * self.__invK) % self.__N)
+        # return self.__Real.item(0, 0)
         # return self.__Real
 
     def encryption(self, x):
