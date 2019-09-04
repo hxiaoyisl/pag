@@ -65,6 +65,10 @@ class IMAGE(Cryption):
         print('**********get grayimage!')
         plt.imshow(self.__grayimage, cmap='gray')
         plt.show()
+        self.__addgaussnoise()
+        print('**********grayimage add gauss noise!')
+        plt.imshow(self.__grayimage, cmap='gray')
+        plt.show()
 
         self.__encryption()  # todo 给灰度图的每个像素加密
         print('**********encry success!')
@@ -156,6 +160,11 @@ class IMAGE(Cryption):
                 gray = int(0.299 * r + 0.587 * g + 0.114 * b)
                 self.__grayimage[i].append(gray)
 
+    def __addgaussnoise(self):
+        for i in range(self.__length):
+            for j in range(self.__width):
+                self.__grayimage[i][j] += random.gauss(mu=0, sigma=self.__sigma)
+
     def __JLgetP(self):  # 生成变换矩阵P，是一个随机矩阵
         self.__P = np.random.normal(0, 1 / self.__K, [self.__S ** 2, self.__K])
 
@@ -180,7 +189,9 @@ class IMAGE(Cryption):
     def __JLgetY(self):
         self.__JLgetP()
         self.__JLgetpixelNN()
-        self.__Y = np.dot(self.__pNN, self.__P)
+        from cipher.chRT import matmulti
+        self.__Y = matmulti(self.__pNN, self.__P, len(self.__pNN), self.__S ** 2, self.__K)
+        # self.__Y = np.dot(self.__pNN, self.__P)
 
     # todo JL变换中对Y矩阵添加高斯噪声
     def __JLaddgauss(self):
@@ -188,7 +199,8 @@ class IMAGE(Cryption):
         self.__JL = [self.__JL[:] for i in range(self.__resize)]
         for i in range(self.__resize):
             for j in range(self.__K):
-                self.__JL[i][j] = self.__Y[i][j] + random.gauss(mu=0, sigma=self.__sigma)
+                self.__JL[i][j] = self.__Y[i][j]
+                # self.__JL[i][j] = self.__Y[i][j] + random.gauss(mu=0, sigma=self.__sigma)
 
     def __DNsetEXP(self, step=init.step):  # todo 注意：以空间换时间的方法，图片太大会爆内存
         self.__exp = [0] * self.__resize
@@ -200,8 +212,8 @@ class IMAGE(Cryption):
                 tmpdis = [abs(x - y) for x, y in zip(self.__JL[i], self.__JL[j])]  # 欧氏距离
                 tmpdis = list(map(lambda x: pow(x, 2), tmpdis))
                 tmpsum = sum(tmpdis)  # k维向量的每一个值加和
-                tem = -(tmpsum - TMPC) / pow(self.__H, 2)
-                # tem = -tmpsum / pow(self.__H, 2)
+                # tem = -(tmpsum - TMPC) / pow(self.__H, 2)
+                tem = -tmpsum / pow(self.__H, 2)
                 tem = math.exp(tem)
                 # tem = int(self.__SCAL * tem)
                 # if tem == 0:
@@ -297,7 +309,8 @@ class IMAGE(Cryption):
                 for l in self.__mat[ind]:
                     for ii in range(4):
                         for jj in range(4):
-                            sumz[ii][jj] += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth][ii][jj]
+                            sumz[ii][jj] += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth][ii][
+                                jj]
                 # print(sumz)
                 self.__noiseimage[i][j] = sumz
 

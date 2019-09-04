@@ -134,6 +134,15 @@ def matmultimod(a, b, n, m):
             res[i][j] %= m
     return res
 
+def matmulti(a, b, row, n, col):
+    res = [0] * col
+    res = [res[:] for i in range(row)]
+    for i in range(row):
+        for j in range(col):
+            for k in range(n):
+                res[i][j] += a[i][k] * b[k][j]
+    return res
+
 
 if __name__ == '__main__':
     K = np.mat([[17, 44, 169, 126], [91, 121, 84, 85], [13, 71, 119, 25], [0, 85, 201, 44]])
