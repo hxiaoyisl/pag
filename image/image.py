@@ -63,7 +63,7 @@ class IMAGE(Cryption):
         import matplotlib.pyplot as plt
         self.__setgrayimage()  # todo 原图变为灰度图
         print('**********get grayimage!')
-        plt.imshow(self.__grayimage,cmap='gray')
+        plt.imshow(self.__grayimage, cmap='gray')
         plt.show()
 
         self.__encryption()  # todo 给灰度图的每个像素加密
@@ -111,9 +111,9 @@ class IMAGE(Cryption):
         # return
         self.__decryption()
         print('**********decryption done!')
-        print('解密后的图片：\n',self.__decryimage)
-        plt.imshow(self.__decryimage)
-        plt.savefig('result01.png')
+        print('解密后的图片：\n', self.__decryimage)
+        plt.imshow(self.__decryimage, cmap='gray')
+        plt.savefig('result.png')
         plt.show()
         print('done!')
 
@@ -126,6 +126,7 @@ class IMAGE(Cryption):
             # s = time.time()
             for j in range(self.__width):
                 self.__encryimage[i][j] = self.REencryption(self.__grayimage[i][j])  # 对每个
+                print(self.__encryimage[i][j])
             # t = time.time()
             # print(t - s)
 
@@ -291,12 +292,14 @@ class IMAGE(Cryption):
         # print(encryimage[0].__len__())
         for i in range(self.__relength):
             for j in range(self.__rewidth):
-                sumz = 0
+                sumz = [[0, 0, 0, 0][:] for i in range(4)]
                 ind = i * self.__rewidth + j
                 for l in self.__mat[ind]:
-                    sumz += self.__W[ind][l]
+                    for ii in range(4):
+                        for jj in range(4):
+                            sumz[ii][jj] += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth][ii][jj]
                 # print(sumz)
-                self.__noiseimage[i][j] = sumz * encryimage[i][j]
+                self.__noiseimage[i][j] = sumz
 
     def test(self):
         self.__grayimage = [[i * j for j in range(1, 6)] for i in range(1, 6)]
