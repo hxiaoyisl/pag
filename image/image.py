@@ -71,6 +71,9 @@ class IMAGE(Cryption):
         # todo 解密
         self.__decryimage = None
 
+        # todo 评估
+        self.__PSNR = 0
+
     # TODO 执行整个过程
     def PERFORM(self):
         import matplotlib.pyplot as plt
@@ -126,8 +129,12 @@ class IMAGE(Cryption):
         # print('解密后的图片：\n', self.__decryimage)
         plt.imshow(self.__decryimage, cmap='gray')
         plt.title('H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
-        plt.savefig('result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
+        plt.savefig('resimage/result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
         plt.show()
+
+        # TODO 计算PSNR
+        self.__calPSNR()
+
         print('done!')
 
     # TODO 测试在不加入加解密的情况下的去噪结果与加入加解密的结果对比
@@ -172,7 +179,7 @@ class IMAGE(Cryption):
         etime1 = time.time()
         plt.imshow(self.__denoiseimage, cmap='gray')
         plt.title('none encryption: H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
-        plt.savefig('none encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
+        plt.savefig('resimage/none encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
         plt.show()
         print('未加密图像去噪时间是：', etime1 - stime1, 's')
 
@@ -182,7 +189,6 @@ class IMAGE(Cryption):
         print('**********denosing done!')
         etime1 = time.time()
         print('图像去噪时间是：', etime1 - stime1, 's')
-
 
         # TODO 对去噪后的图像进行解密
         stime1 = time.time()
@@ -194,12 +200,23 @@ class IMAGE(Cryption):
         etime = time.time()
         print('时间是：', etime - stime, 's')
 
-        print('解密后的图片：\n', self.__decryimage)
+        # print('解密后的图片：\n', self.__decryimage)
         plt.imshow(self.__decryimage, cmap='gray')
         plt.title('encryption H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
-        plt.savefig('encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
+        plt.savefig('resimage/encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
         plt.show()
+
+        # TODO 计算PSNR
+        self.__calPSNR()
+
         print('done!')
+
+    # todo 计算去噪图片和原始图片的PSNR
+    def __calPSNR(self):
+        sourceimage = [i[self.__scope:-self.__scope] for i in self.__grayimage][self.__scope:-self.__scope]
+        from image.standard import calPSNR
+        self.__PSNR = calPSNR(sourceimage, self.__decryimage)
+        print('图像的PSNR值为: ', self.__PSNR)
 
     # TODO 对原图像进行加密
     def __encryption(self):
