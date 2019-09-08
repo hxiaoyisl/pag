@@ -18,8 +18,20 @@ from cipher.cryption import Cryption
 import init
 
 
-class IMAGE(Cryption):
+def showimage(image, nosieimage):
+    from matplotlib import pyplot as plt
+    import pylab
+    plt.figure(1)
+    plt.subplot(121)
+    plt.imshow(image, cmap='gary')
+    plt.title("Origin picture")
+    plt.subplot(122)
+    plt.imshow(nosieimage, cmap='gary')
+    plt.title("Add Gaussian image")
+    pylab.show()
 
+
+class IMAGE(Cryption):
     def __init__(self, image):
         self.__image = copy.deepcopy(image)
         self.__grayimage = []
@@ -54,70 +66,138 @@ class IMAGE(Cryption):
         self.__exp = []
         self.__Z = []
         self.__W = []
-        self.__noiseimage = None
+        self.__denoiseimage = None
 
         # todo 解密
         self.__decryimage = None
 
-    def Init(self):
+    # TODO 执行整个过程
+    def PERFORM(self):
         import matplotlib.pyplot as plt
-        self.__setgrayimage()  # todo 原图变为灰度图
+
+        stime = time.time()
+
+        # todo 原图变为灰度图
+        self.__setgrayimage()
         print('**********get grayimage!')
         plt.imshow(self.__grayimage, cmap='gray')
         plt.show()
-        self.__addgaussnoise()
-        print('**********grayimage add gauss noise!')
-        plt.imshow(self.__grayimage, cmap='gray')
-        plt.show()
-
-        self.__encryption()  # todo 给灰度图的每个像素加密
-        print('**********encry success!')
-        # self.__decryption2()
-        # plt.imshow(self.__decryimage)
+        # self.__addgaussnoise()
+        # print('**********grayimage add gauss noise!')
+        # plt.imshow(self.__grayimage, cmap='gray')
         # plt.show()
-        # return
 
+        # todo 给灰度图的每个像素加密
+        stime1 = time.time()
+        self.__encryption()
+        print('**********encry success!')
+        etime1 = time.time()
+        print('图像加密时间是：', etime1 - stime1, 's')
+
+        # todo JL transform
+        stime1 = time.time()
         self.__JLgetY()  # 得到JL变化的Y矩阵
-        # print('gray图:')
-        # for i in range(self.__grayimage.__len__()):
-        #     print(self.__grayimage[i])
-        # print('p矩阵:')
-        # for i in range(self.__P.__len__()):
-        #     print(self.__P[i])
-        # print('pNN矩阵:')
-        # for i in range(self.__resize):
-        #     print(i,self.__pNN[i])
-        # print('mat矩阵:')
-        # for i in range(self.__resize):
-        #     print(self.__mat[i])
-        # return
-        # print('Y矩阵')
-        # for i in range(self.__resize):
-        #     print(i, self.__Y[i])
-        # print('**********get JL Y!')
         self.__JLaddgauss()  # 得到JL变换的最终矩阵
-        # print('JL矩阵')
-        # for i in range(self.__resize):
-        #     print(i, self.__JL[i])
-        # print('**********JL transform done!')
-        # return
-
         self.__DNsetEXP()
         self.__DNsetZ()
         print('**********Z cal done!')
-        # return
         self.__DNsetW()
         print('**********W cal done!')
-        # return
+        etime1 = time.time()
+        print('JL变换时间是：', etime1 - stime1, 's')
 
+        # TODO 对加密的图像进行去噪
+        stime1 = time.time()
         self.__DNdenosing()
         print('**********denosing done!')
-        # return
+        etime1 = time.time()
+        print('图像去噪时间是：', etime1 - stime1, 's')
+
+        # TODO 对去噪后的图像进行解密
+        stime1 = time.time()
         self.__decryption()
         print('**********decryption done!')
+        etime1 = time.time()
+        print('图像解密时间是：', etime1 - stime1, 's')
+
+        etime = time.time()
+        print('时间是：', etime - stime, 's')
+
+        # print('解密后的图片：\n', self.__decryimage)
+        plt.imshow(self.__decryimage, cmap='gray')
+        plt.title('H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
+        plt.savefig('result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
+        plt.show()
+        print('done!')
+
+    # TODO 测试在不加入加解密的情况下的去噪结果与加入加解密的结果对比
+    def REPERFORM(self):
+        import matplotlib.pyplot as plt
+
+        stime = time.time()
+
+        # todo 原图变为灰度图
+        self.__setgrayimage()
+        print('**********get grayimage!')
+        plt.imshow(self.__grayimage, cmap='gray')
+        plt.show()
+        # self.__addgaussnoise()
+        # print('**********grayimage add gauss noise!')
+        # plt.imshow(self.__grayimage, cmap='gray')
+        # plt.show()
+
+        # todo 给灰度图的每个像素加密
+        stime1 = time.time()
+        self.__encryption()
+        print('**********encry success!')
+        etime1 = time.time()
+        print('图像加密时间是：', etime1 - stime1, 's')
+
+        # todo JL transform
+        stime1 = time.time()
+        self.__JLgetY()  # 得到JL变化的Y矩阵
+        self.__JLaddgauss()  # 得到JL变换的最终矩阵
+        self.__DNsetEXP()
+        self.__DNsetZ()
+        print('**********Z cal done!')
+        self.__DNsetW()
+        print('**********W cal done!')
+        etime1 = time.time()
+        print('JL变换时间是：', etime1 - stime1, 's')
+
+        # TODO 对未加密的图像进行去噪
+        stime1 = time.time()
+        self.__ReDNdenosing()
+        print('**********denosing done!')
+        etime1 = time.time()
+        plt.imshow(self.__denoiseimage, cmap='gray')
+        plt.title('none encryption: H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
+        plt.savefig('none encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
+        plt.show()
+        print('未加密图像去噪时间是：', etime1 - stime1, 's')
+
+        # TODO 对加密的图像进行去噪
+        stime1 = time.time()
+        self.__DNdenosing()
+        print('**********denosing done!')
+        etime1 = time.time()
+        print('图像去噪时间是：', etime1 - stime1, 's')
+
+
+        # TODO 对去噪后的图像进行解密
+        stime1 = time.time()
+        self.__decryption()
+        print('**********decryption done!')
+        etime1 = time.time()
+        print('图像解密时间是：', etime1 - stime1, 's')
+
+        etime = time.time()
+        print('时间是：', etime - stime, 's')
+
         print('解密后的图片：\n', self.__decryimage)
         plt.imshow(self.__decryimage, cmap='gray')
-        plt.savefig('result.png')
+        plt.title('encryption H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
+        plt.savefig('encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
         plt.show()
         print('done!')
 
@@ -130,7 +210,7 @@ class IMAGE(Cryption):
             # s = time.time()
             for j in range(self.__width):
                 self.__encryimage[i][j] = self.REencryption(self.__grayimage[i][j])  # 对每个
-                print(self.__encryimage[i][j])
+                # print(self.__encryimage[i][j])
             # t = time.time()
             # print(t - s)
 
@@ -146,8 +226,8 @@ class IMAGE(Cryption):
         self.__decryimage = [self.__decryimage[:] for i in range(self.__relength)]
         for i in range(self.__relength):
             for j in range(self.__rewidth):
-                self.__decryimage[i][j] = self.REdecryption(self.__noiseimage[i][j]) // self.__SCAL
-                print(self.__decryimage[i][j])
+                self.__decryimage[i][j] = self.REdecryption(self.__denoiseimage[i][j]) // self.__SCAL
+                # print(self.__decryimage[i][j])
 
     # todo 原图变为灰度图
     def __setgrayimage(self):
@@ -160,11 +240,13 @@ class IMAGE(Cryption):
                 gray = int(0.299 * r + 0.587 * g + 0.114 * b)
                 self.__grayimage[i].append(gray)
 
+    # todo 为灰度图添加高斯噪声
     def __addgaussnoise(self):
         for i in range(self.__length):
             for j in range(self.__width):
                 self.__grayimage[i][j] += random.gauss(mu=0, sigma=self.__sigma)
 
+    # TODO 得到JL变换中的p矩阵，P矩阵本身是一个高斯矩阵
     def __JLgetP(self):  # 生成变换矩阵P，是一个随机矩阵
         self.__P = np.random.normal(0, 1 / self.__K, [self.__S ** 2, self.__K])
 
@@ -283,6 +365,7 @@ class IMAGE(Cryption):
         #
         # print(self.__Z)
 
+    # TODO 得到JL变换的去噪参数
     def __DNsetW(self):
         self.__W = [0] * self.__resize
         self.__W = [self.__W[:] for i in range(self.__resize)]
@@ -296,9 +379,10 @@ class IMAGE(Cryption):
         # for i in range(self.__W.__len__()):
         #     print(self.__W[i])
 
+    # TODO 对加密后的图像进行去噪
     def __DNdenosing(self):
-        self.__noiseimage = [0] * self.__rewidth
-        self.__noiseimage = [self.__noiseimage[:] for i in range(self.__relength)]
+        self.__denoiseimage = [0] * self.__rewidth
+        self.__denoiseimage = [self.__denoiseimage[:] for i in range(self.__relength)]
         encryimage = [i[self.__scope:-self.__scope] for i in self.__encryimage][self.__scope:-self.__scope]
         # print(encryimage.__len__())
         # print(encryimage[0].__len__())
@@ -312,7 +396,23 @@ class IMAGE(Cryption):
                             sumz[ii][jj] += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth][ii][
                                 jj]
                 # print(sumz)
-                self.__noiseimage[i][j] = sumz
+                self.__denoiseimage[i][j] = sumz
+
+    # TODO 对原始图像进行去噪，用于与加密图像去噪后作对比
+    def __ReDNdenosing(self):
+        self.__denoiseimage = [0] * self.__rewidth
+        self.__denoiseimage = [self.__denoiseimage[:] for i in range(self.__relength)]
+        encryimage = [i[self.__scope:-self.__scope] for i in self.__grayimage][self.__scope:-self.__scope]
+        # print(encryimage.__len__())
+        # print(encryimage[0].__len__())
+        for i in range(self.__relength):
+            for j in range(self.__rewidth):
+                sumz = 0
+                ind = i * self.__rewidth + j
+                for l in self.__mat[ind]:
+                    sumz += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth]
+                # print(sumz)
+                self.__denoiseimage[i][j] = sumz
 
     def test(self):
         self.__grayimage = [[i * j for j in range(1, 6)] for i in range(1, 6)]
@@ -333,7 +433,7 @@ class IMAGE(Cryption):
         return self.__image
 
     def getNoiseimage(self):
-        return self.__noiseimage
+        return self.__denoiseimage
 
     def getGrayimage(self):
         return self.__grayimage

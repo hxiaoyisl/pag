@@ -15,26 +15,16 @@ from image.image import *
 import matplotlib.pylab as plt
 import numpy as np
 
-def showimage(image, nosieimage):
-    from matplotlib import pyplot as plt
-    import pylab
-    plt.figure(1)
-    plt.subplot(121)
-    plt.imshow(image)
-    plt.title("Origin picture")
-    plt.subplot(122)
-    plt.imshow(nosieimage)
-    plt.title("Add Gaussian image")
-    pylab.show()
-
 # todo 读取图片
 image = io.imread(init.imagepath)  # length*width*(r,g,b)
 # image.reshape((5,6))
 
 # todo 初始化图片
 IMG = IMAGE(image)
-IMG.printimagesize()
-IMG.Init()
+# IMG.printimagesize()
+
+# IMG.PERFORM()
+IMG.REPERFORM()
 # IMG.test()
 
 # todo 图片加噪
