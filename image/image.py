@@ -35,6 +35,7 @@ class IMAGE(Cryption):
     def __init__(self, image):
         self.__image = copy.deepcopy(image)
         self.__grayimage = []
+        self.__regrayimage=[]
         self.__length = len(image)
         self.__width = len(image[0])
         self.__size = self.__length * self.__width  # 像素个数
@@ -146,12 +147,17 @@ class IMAGE(Cryption):
         # todo 原图变为灰度图
         self.__setgrayimage()
         print('**********get grayimage!')
+        self.__regrayimage=self.__grayimage
+
         plt.imshow(self.__grayimage, cmap='gray')
         plt.show()
-        # self.__addgaussnoise()
-        # print('**********grayimage add gauss noise!')
-        # plt.imshow(self.__grayimage, cmap='gray')
-        # plt.show()
+
+        self.__addgaussnoise()
+        print('**********grayimage add gauss noise!')
+        plt.imshow(self.__grayimage, cmap='gray')
+        plt.show()
+        print("加噪后的灰度图",self.__grayimage)
+        # return
 
         # todo 给灰度图的每个像素加密
         stime1 = time.time()
@@ -182,6 +188,8 @@ class IMAGE(Cryption):
         plt.savefig('resimage/none encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
         plt.show()
         print('未加密图像去噪时间是：', etime1 - stime1, 's')
+        self.__calPSNR2()
+        print("为加密的图像",self.__denoiseimage)
 
         # TODO 对加密的图像进行去噪
         stime1 = time.time()
@@ -200,7 +208,7 @@ class IMAGE(Cryption):
         etime = time.time()
         print('时间是：', etime - stime, 's')
 
-        # print('解密后的图片：\n', self.__decryimage)
+        print('解密后的图片：\n', self.__decryimage)
         plt.imshow(self.__decryimage, cmap='gray')
         plt.title('encryption H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
         plt.savefig('resimage/encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
@@ -213,9 +221,16 @@ class IMAGE(Cryption):
 
     # todo 计算去噪图片和原始图片的PSNR
     def __calPSNR(self):
-        sourceimage = [i[self.__scope:-self.__scope] for i in self.__grayimage][self.__scope:-self.__scope]
+        sourceimage = [i[self.__scope:-self.__scope] for i in self.__regrayimage][self.__scope:-self.__scope]
         from image.standard import calPSNR
         self.__PSNR = calPSNR(sourceimage, self.__decryimage)
+        print('图像的PSNR值为: ', self.__PSNR)
+
+    # todo 计算未加密去噪图片和原始图片的PSNR
+    def __calPSNR2(self):
+        sourceimage = [i[self.__scope:-self.__scope] for i in self.__regrayimage][self.__scope:-self.__scope]
+        from image.standard import calPSNR
+        self.__PSNR = calPSNR(sourceimage, self.__denoiseimage)
         print('图像的PSNR值为: ', self.__PSNR)
 
     # TODO 对原图像进行加密
@@ -261,7 +276,9 @@ class IMAGE(Cryption):
     def __addgaussnoise(self):
         for i in range(self.__length):
             for j in range(self.__width):
-                self.__grayimage[i][j] += random.gauss(mu=0, sigma=self.__sigma)
+                # gauss=random.gauss(mu=0, sigma=self.__sigma)
+                # print(gauss)
+                self.__grayimage[i][j] += int(random.gauss(mu=0, sigma=self.__sigma))
 
     # TODO 得到JL变换中的p矩阵，P矩阵本身是一个高斯矩阵
     def __JLgetP(self):  # 生成变换矩阵P，是一个随机矩阵
@@ -429,7 +446,7 @@ class IMAGE(Cryption):
                 for l in self.__mat[ind]:
                     sumz += self.__W[ind][l] * encryimage[l // self.__rewidth][l % self.__rewidth]
                 # print(sumz)
-                self.__denoiseimage[i][j] = sumz
+                self.__denoiseimage[i][j] = sumz // self.__SCAL
 
     def test(self):
         self.__grayimage = [[i * j for j in range(1, 6)] for i in range(1, 6)]
