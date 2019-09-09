@@ -156,7 +156,7 @@ class IMAGE(Cryption):
         print('**********grayimage add gauss noise!')
         plt.imshow(self.__grayimage, cmap='gray')
         plt.show()
-        print("加噪后的灰度图",self.__grayimage)
+        # print("加噪后的灰度图",self.__grayimage)
         # return
 
         # todo 给灰度图的每个像素加密
@@ -189,7 +189,7 @@ class IMAGE(Cryption):
         plt.show()
         print('未加密图像去噪时间是：', etime1 - stime1, 's')
         self.__calPSNR2()
-        print("为加密的图像",self.__denoiseimage)
+        # print("未加密的图像",self.__denoiseimage)
 
         # TODO 对加密的图像进行去噪
         stime1 = time.time()
@@ -208,7 +208,7 @@ class IMAGE(Cryption):
         etime = time.time()
         print('时间是：', etime - stime, 's')
 
-        print('解密后的图片：\n', self.__decryimage)
+        # print('解密后的图片：\n', self.__decryimage)
         plt.imshow(self.__decryimage, cmap='gray')
         plt.title('encryption H=' + str(self.__H) + ' ,scal=' + str(self.__SCAL))
         plt.savefig('resimage/encryption result: H=' + str(self.__H) + '-SCAL=' + str(self.__SCAL) + '.png')
